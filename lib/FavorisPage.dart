@@ -5,7 +5,6 @@ import 'package:musicplayer/Models/SongModel.dart';
 import 'package:musicplayer/MusicPlayer.dart';
 import 'package:flutter/services.dart';
 
-
 class FavorisPage extends StatefulWidget {
   FavorisPage({super.key});
 
@@ -14,15 +13,13 @@ class FavorisPage extends StatefulWidget {
 }
 
 class _FavorisPageState extends State<FavorisPage> {
+  List<SongModel> FavorisSongs = List.empty(growable: true);
 
-  List<SongModel> FavorisSongs = List.empty(growable:true);
-
-  Future<void> loadSongs() async{
+  Future<void> loadSongs() async {
     FavorisSongs.clear();
-    FavorisSongs .addAll(await DataAccess.GetFavories());
+    FavorisSongs.addAll(await DataAccess.GetFavories());
 
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
@@ -32,7 +29,6 @@ class _FavorisPageState extends State<FavorisPage> {
     // Load songs from database
     loadSongs();
   }
-
 
   Widget getBody() {
     if (FavorisSongs.isEmpty) {
@@ -47,19 +43,26 @@ class _FavorisPageState extends State<FavorisPage> {
               onTap: () {
                 MusicPlayer.playSong(FavorisSongs[i].path);
               },
-              child: Card(
-                color: Colors.white70,
-                margin: const EdgeInsets.all(5),
-                child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(FavorisSongs[i].name)),
+              child: GestureDetector(
+                onLongPress: ()async {
+                  await DataAccess.RemoveFavorie(FavorisSongs[i]);
+                  setState(() {
+                    FavorisSongs.remove(FavorisSongs[i]);
+                  });
+                },
+                child: Card(
+                  color: Colors.white70,
+                  margin: const EdgeInsets.all(5),
+                  child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(FavorisSongs[i].name)),
+                ),
               ),
             );
           },
           itemCount: FavorisSongs.length,
         ),
       );
-
     }
   }
 

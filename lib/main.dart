@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:musicplayer/DataAccess.dart';
 import 'package:musicplayer/FavorisPage.dart';
 import 'package:musicplayer/Models/SongModel.dart';
 import 'package:musicplayer/MusicPlayer.dart';
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
       var name = element.path.split("/").last;
 
       // Create a new song and add it to the list of songs
-      songs.add(SongModel(name, element.path));
+      songs.add(SongModel(name, element.path, false));
     }
 
     setState(() {});
@@ -257,6 +258,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: const Padding(
                           padding: EdgeInsets.all(5),
                           child: Icon(Icons.navigate_next))),
+                  GestureDetector(onTap: (){
+                    if(songs.isNotEmpty){
+                      setState(() {
+                        songs[currentPlayingSongIndex].isFavorite = !songs[currentPlayingSongIndex].isFavorite;
+                        if(songs[currentPlayingSongIndex].isFavorite) {
+                          DataAccess.AddFavorie(songs[currentPlayingSongIndex]);
+                        }else{
+                          DataAccess.RemoveFavorie(songs[currentPlayingSongIndex]);
+                        }
+                      });
+                    }
+                  },  child:Icon(Icons.heart_broken, color: (songs.isEmpty || !songs[currentPlayingSongIndex].isFavorite)
+                      ? Colors.black12
+                      : Colors.red,),),
                 ],
               ),
             ],
