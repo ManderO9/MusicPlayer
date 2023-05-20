@@ -3,10 +3,12 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application
         android:label="musicplayer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <service android:name=".MyService" exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

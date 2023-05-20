@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:musicplayer/Models/SongModel.dart';
 import 'package:musicplayer/MusicPlayer.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,10 +35,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // TODO: fix red screen when page loads
   List<SongModel> songs = List.empty(growable: true);
-
   MusicPlayer musicPlayer = MusicPlayer();
+  IconData playPauseIcon = Icons.play_arrow;
+  bool musicPlaying = false;
+  int currentPlayingSongIndex = 0;
+  MethodChannel methodChannel = const MethodChannel("messages");
+
+  void initMethodChannel() {
+    // Listen for events coming from the android side
+    methodChannel.setMethodCallHandler((call) async {
+      // If we pressed next in the notification
+      if (call.method == "Next") {
+        // Play next song
+        nextSong();
+      }
+      // If we pressed previous in the notification
+      else if (call.method == "Previous") {
+        // Play the previous song
+        previousSong();
+      }
+      // If we pressed the play/pause button in the notification
+      else if (call.method == "PlayPause") {
+        // Play/stop the music accordingly
+        playStopMusic();
+      }
+    });
+  }
+
+  Future<void> startService() async {
+    await methodChannel.invokeMethod("StartService");
+  }
+
+  Future<void> stopService() async {
+    await methodChannel.invokeMethod("StopService");
+  }
 
   Future<void> loadSongs() async {
     // Folder to start searching for songs from
@@ -112,19 +144,30 @@ class _MyHomePageState extends State<MyHomePage> {
     playSong((currentPlayingSongIndex - 1) % songs.length);
   }
 
-  IconData playPauseIcon = Icons.play_arrow;
-  bool musicPlaying = false;
-  int currentPlayingSongIndex = 0;
-
   @override
   void initState() {
     super.initState();
+
+    // Load song from file
     loadSongs();
+
+    // Initialize method channel between android and flutter
+    initMethodChannel();
+
+    // Start the music service
+    startService();
+  }
+
+  @override
+  void dispose(){
+    stopService();
+    super.dispose();
   }
 
   Widget getBody() {
     if (songs.isEmpty) {
-      return const Padding(padding: EdgeInsets.all(20),  child:Text("loading..."));
+      return const Padding(
+          padding: EdgeInsets.all(20), child: Text("loading..."));
     } else {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 0, 140),

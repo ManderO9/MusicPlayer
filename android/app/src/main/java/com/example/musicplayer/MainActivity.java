@@ -5,16 +5,52 @@ import io.flutter.embedding.android.FlutterActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.content.pm.PackageManager;
-
 import android.Manifest;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.embedding.engine.FlutterEngine;
+
+import android.widget.Toast;
+import android.content.Intent;
+
 public class MainActivity extends FlutterActivity {
+
     protected void onCreate(Bundle savedInstanceState) {
         this.RequestPermissions();
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        super.configureFlutterEngine(flutterEngine);
+        MethodChannel methodChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "messages");
+        Utils.Init(methodChannel);
+        methodChannel.setMethodCallHandler(
+            (call, result) -> {
+                if (call.method.equals("StartService")) {
+                    StartService();
+                    result.success("OK");
+                }
+                if (call.method.equals("StopService")) {
+                    StopService();
+                    result.success("OK");
+                }
+            }
+        );
+    }
+
+
+    private void StartService() {
+        startService(new Intent(getApplicationContext(), MyService.class));
+    }
+
+    private void StopService() {
+        stopService(new Intent(getApplicationContext(), MyService.class));
+    }
 
     public void RequestPermissions() {
         int check = ActivityCompat.checkSelfPermission(getApplicationContext(),
