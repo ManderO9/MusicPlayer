@@ -1,16 +1,22 @@
 //import 'package:audioplayers/audioplayers.dart';
 
 class MusicPlayer{
-
   //AudioPlayer player=  AudioPlayer();
 
-  playSong(String path){
+
+  static init(){
 
   }
-  pauseCurrentSong(){
+
+  static playSong(String path){
+
   }
 
-  stopPlaying(){
+  static pauseCurrentSong(){
+
+  }
+
+  static stopPlaying(){
 
   }
 

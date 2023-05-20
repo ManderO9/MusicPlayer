@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:musicplayer/FavorisPage.dart';
 import 'package:musicplayer/Models/SongModel.dart';
 import 'package:musicplayer/MusicPlayer.dart';
 import 'package:flutter/services.dart';
+
+import 'DownloadPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +39,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<SongModel> songs = List.empty(growable: true);
-  MusicPlayer musicPlayer = MusicPlayer();
   IconData playPauseIcon = Icons.play_arrow;
   bool musicPlaying = false;
   int currentPlayingSongIndex = 0;
@@ -110,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Play the requested song
     // TODO: maybe have a check if we are already playing another song or not
-    musicPlayer.playSong(songs[index].path);
+    MusicPlayer.playSong(songs[index].path);
   }
 
   void pauseSong() {
@@ -123,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
     musicPlaying = false;
 
     // Pause current song
-    musicPlayer.pauseCurrentSong();
+    MusicPlayer.pauseCurrentSong();
   }
 
   void playStopMusic() {
@@ -156,10 +158,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Start the music service
     startService();
+
+    // Initialize music player service
+    MusicPlayer.init();
   }
 
   @override
-  void dispose(){
+  void dispose() {
     stopService();
     super.dispose();
   }
@@ -197,6 +202,20 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => FavorisPage()));
+              },
+              child: const Icon(Icons.heart_broken)),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => DownloadPage()));
+              },
+              child: const Icon(Icons.download))
+        ],
       ),
 
       // Songs list
