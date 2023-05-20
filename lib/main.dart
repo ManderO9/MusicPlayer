@@ -87,13 +87,24 @@ class _MyHomePageState extends State<MyHomePage> {
     // Delete all existing songs
     songs.clear();
 
+    // Get the favorite songs
+    var favorites = await DataAccess.GetFavories();
+
     // For each file item
     for (var element in children) {
       // Get the name of the file
       var name = element.path.split("/").last;
 
+      // Whether this song is a favorite
+      bool isFavorite = false;
+
+      // Check if this song is a favorite
+      if(favorites.any((fav) => fav.path ==element.path )) {
+        isFavorite = true;
+      }
+
       // Create a new song and add it to the list of songs
-      songs.add(SongModel(name, element.path, false));
+      songs.add(SongModel(name, element.path, isFavorite));
     }
 
     setState(() {});
@@ -112,7 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
     musicPlaying = true;
 
     // Play the requested song
-    // TODO: maybe have a check if we are already playing another song or not
     MusicPlayer.playSong(songs[index].path);
   }
 
@@ -167,6 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     stopService();
+    MusicPlayer.stopPlaying();
     super.dispose();
   }
 
@@ -204,18 +215,24 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          ElevatedButton(
+          IconButton(
+              onPressed: () async {
+                // Reload songs
+                await loadSongs();
+              },
+              icon: const Icon(Icons.refresh)),
+          IconButton(
               onPressed: () {
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => FavorisPage()));
               },
-              child: const Icon(Icons.heart_broken)),
-          ElevatedButton(
+              icon: const Icon(Icons.heart_broken)),
+          IconButton(
               onPressed: () {
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => DownloadPage()));
               },
-              child: const Icon(Icons.download))
+              icon: const Icon(Icons.download))
         ],
       ),
 
@@ -258,20 +275,30 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: const Padding(
                           padding: EdgeInsets.all(5),
                           child: Icon(Icons.navigate_next))),
-                  GestureDetector(onTap: (){
-                    if(songs.isNotEmpty){
-                      setState(() {
-                        songs[currentPlayingSongIndex].isFavorite = !songs[currentPlayingSongIndex].isFavorite;
-                        if(songs[currentPlayingSongIndex].isFavorite) {
-                          DataAccess.AddFavorie(songs[currentPlayingSongIndex]);
-                        }else{
-                          DataAccess.RemoveFavorie(songs[currentPlayingSongIndex]);
-                        }
-                      });
-                    }
-                  },  child:Icon(Icons.heart_broken, color: (songs.isEmpty || !songs[currentPlayingSongIndex].isFavorite)
-                      ? Colors.black12
-                      : Colors.red,),),
+                  GestureDetector(
+                    onTap: () {
+                      if (songs.isNotEmpty) {
+                        setState(() {
+                          songs[currentPlayingSongIndex].isFavorite =
+                              !songs[currentPlayingSongIndex].isFavorite;
+                          if (songs[currentPlayingSongIndex].isFavorite) {
+                            DataAccess.AddFavorie(
+                                songs[currentPlayingSongIndex]);
+                          } else {
+                            DataAccess.RemoveFavorie(
+                                songs[currentPlayingSongIndex]);
+                          }
+                        });
+                      }
+                    },
+                    child: Icon(
+                      Icons.heart_broken,
+                      color: (songs.isEmpty ||
+                              !songs[currentPlayingSongIndex].isFavorite)
+                          ? Colors.black12
+                          : Colors.red,
+                    ),
+                  ),
                 ],
               ),
             ],

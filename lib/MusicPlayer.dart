@@ -16,7 +16,7 @@ class MusicPlayer{
   }
 
   static stopPlaying(){
-
+    player?.stop();
   }
 
 }
