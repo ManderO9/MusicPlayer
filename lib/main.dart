@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:musicplayer/Models/SongModel.dart';
+import 'package:musicplayer/MusicPlayer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,6 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // TODO: fix red screen when page loads
   List<SongModel> songs = List.empty(growable: true);
 
+  MusicPlayer musicPlayer = MusicPlayer();
+
   Future<void> loadSongs() async {
     // Folder to start searching for songs from
     var dir = Directory("/storage/emulated/0/Download/");
@@ -57,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Create a new song and add it to the list of songs
       songs.add(SongModel(name, element.path));
     }
+
     setState(() {});
   }
 
@@ -72,10 +76,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // Set music playing flag
     musicPlaying = true;
 
-    // TODO: play music logic
-
-    // Stop previous song if any was playing
-    // start the new song
+    // Play the requested song
+    // TODO: maybe have a check if we are already playing another song or not
+    musicPlayer.playSong(songs[index].path);
   }
 
   void pauseSong() {
@@ -86,7 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Set music playing flag
     musicPlaying = false;
-    // TODO: pause music logic
+
+    // Pause current song
+    musicPlayer.pauseCurrentSong();
   }
 
   void playStopMusic() {
@@ -119,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget getBody() {
     if (songs.isEmpty) {
-      return const Text("loading...");
+      return const Padding(padding: EdgeInsets.all(20),  child:Text("loading..."));
     } else {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 0, 140),
@@ -163,7 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               Padding(
                   padding: const EdgeInsets.all(5),
-                  child: Text(songs[currentPlayingSongIndex].name)),
+                  child: Text(songs.isEmpty
+                      ? ""
+                      : songs[currentPlayingSongIndex].name)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
